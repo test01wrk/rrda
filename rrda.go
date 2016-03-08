@@ -15,6 +15,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -95,6 +96,12 @@ func jsonify(w http.ResponseWriter, r *http.Request, question []dns.Question, an
 	}
 }
 
+func packed(w http.ResponseWriter, m *dns.Msg) {
+	if msg, err = m.Pack(); err == nil {
+		io.WriteString(w, base64.StdEncoding.EncodeToString(msg))
+	}
+}
+
 // Perform DNS resolution
 func resolve(w http.ResponseWriter, r *http.Request, server string, domain string, querytype uint16) {
 	m := new(dns.Msg)
@@ -118,7 +125,8 @@ Redo:
 		case dns.RcodeRefused:
 			error(w, 500, 505, "The name server refuses to perform the specified operation for policy or security reasons (REFUSED)")
 		default:
-			jsonify(w, r, in.Question, in.Answer, in.Ns, in.Extra)
+			packed(w, in)
+			//jsonify(w, r, in.Question, in.Answer, in.Ns, in.Extra)
 		}
 	} else if err == dns.ErrTruncated {
 		c.Net = "tcp"
