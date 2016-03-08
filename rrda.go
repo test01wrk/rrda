@@ -97,7 +97,7 @@ func jsonify(w http.ResponseWriter, r *http.Request, question []dns.Question, an
 }
 
 func packed(w http.ResponseWriter, m *dns.Msg) {
-	if msg, err = m.Pack(); err == nil {
+	if msg, err := m.Pack(); err == nil {
 		io.WriteString(w, base64.StdEncoding.EncodeToString(msg))
 	}
 }
